@@ -48,7 +48,7 @@ h2 {
   font-family: "Black Ops One", cursive;
   font-size: 14rem;
   text-transform: uppercase;
-  background-image: url(./img/1624.jpg);
+  background-image: url(./img/background.jpg);
   background-size: cover;
   background-clip: text;
   -webkit-background-clip: text;
@@ -154,7 +154,6 @@ button:focus {
 }
 
 .wrapper {
-  border: 2px solid red;
   display: flex;
   flex-flow: column;
   justify-content: space-evenly;
@@ -162,4 +161,43 @@ button:focus {
   border-top-left-radius: 50px;
   border-top-right-radius: 50px;
   width: 100%;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+}
+
+.increment,
+.decrement,
+.rate {
+  color: white;
+  padding: 5px;
+}
+
+.rate {
+  width: 46px;
+}
+
+.increment:hover,
+.decrement:hover {
+  cursor: pointer;
+}
+
+.container--rating {
+  margin-top: 20px;
+  width: 60%;
+}
+
+.container--wrapper {
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  font-weight: bold;
+  border-radius: 40px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  width: 100%;
+  transition: 0.5s;
 }

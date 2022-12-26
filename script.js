@@ -31,16 +31,18 @@ const truncate = (str, n) => {
 const displayResults = () => {
   let title;
   searchData.forEach((anime) => {
-    title = truncate(anime.title, 60);
+    title = truncate(anime.title, 40);
     containerFetched.style.padding = `1rem`;
     containerFetched.innerHTML += `
         <div class="card">
           <img src="${anime.images.jpg.image_url}" alt="Anime" class="anime-picture" />
           <p class="anime-title">${title}</p>
           <div class="container--rating">
-            <input class="rate" type="number" >
-            <button class="decrement">-</button>
-            <button class="increment">+</button>
+          <div class="container--wrapper">
+            <span class="increment">ᗑ</span>
+            <span class="decrement">ᗐ</span>
+            <span class="rate">0</span>
+            </div>
           </div>
           <button class="anime-btn-add">Add</button>
         </div>
@@ -49,7 +51,7 @@ const displayResults = () => {
 
   hideRanks();
   setupAddButtons();
-  setupRatingButtons();
+  setupRankingButtons();
   searchData = [];
 };
 
@@ -63,10 +65,8 @@ const hideRanks = () => {
   });
 };
 
-buttonSearch.addEventListener(`click`, (e) => {
-  e.preventDefault();
+const search = () => {
   containerFetched.innerHTML = ``;
-  // containerFetched.innerHTML +=
   if (inputSearch.value !== ``) {
     containerFetched.innerHTML += `<div class="wrapper">
     <h2> Found </h2> 
@@ -77,7 +77,51 @@ buttonSearch.addEventListener(`click`, (e) => {
     <h2> No results, try again! </h2> 
     </div>`;
   }
+};
+
+inputSearch.addEventListener(`keydown`, (e) => {
+  if (e.key == `Enter`) {
+    e.preventDefault();
+    search();
+  }
 });
+
+buttonSearch.addEventListener(`click`, (e) => {
+  e.preventDefault();
+  search();
+});
+
+buttonSearch.addEventListener(`keydown`, (e) => {
+  if (e.key == `Enter`) {
+    e.preventDefault();
+    search();
+  }
+});
+
+const setupRankingButtons = () => {
+  const buttonsInc = document.querySelectorAll(`.increment`);
+  const buttonsDec = document.querySelectorAll(`.decrement`);
+
+  buttonsInc.forEach((btn) => {
+    const card = btn.parentNode;
+    const _rate = card.querySelector(`.rate`);
+    btn.addEventListener(`click`, () => {
+      if (_rate.innerHTML < 10) {
+        _rate.innerHTML = +_rate.innerHTML + 0.5;
+      }
+    });
+  });
+
+  buttonsDec.forEach((btn) => {
+    const card = btn.parentNode;
+    const _rate = card.querySelector(`.rate`);
+    btn.addEventListener(`click`, () => {
+      if (+_rate.innerHTML > 0) {
+        _rate.innerHTML = +_rate.innerHTML - 0.5;
+      }
+    });
+  });
+};
 
 const setupAddButtons = () => {
   const buttons = document.querySelectorAll(`.anime-btn-add`);
@@ -92,29 +136,6 @@ const setupAddButtons = () => {
         btn.textContent = `Remove`;
         containerAdded.appendChild(card);
       }
-    });
-  });
-};
-
-const setupRatingButtons = () => {
-  const buttonsInc = document.querySelectorAll(`.increment`);
-  buttonsInc.forEach((btn) => {
-    const card = btn.parentNode;
-    const input = card.querySelector(`.rate`);
-    btn.addEventListener(`click`, () => {
-      console.log(`Incremented`);
-      input.value = +input.value + 1;
-    });
-  });
-
-  const buttonsDec = document.querySelectorAll(`.decrement`);
-  buttonsDec.forEach((btn) => {
-    const card = btn.parentNode;
-    const input = card.querySelector(`.rate`);
-    // const card = btn.parentNode;
-    btn.addEventListener(`click`, () => {
-      console.log(`Decremented`);
-      input.value = +input.value - 1;
     });
   });
 };
