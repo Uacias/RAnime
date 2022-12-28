@@ -33,7 +33,7 @@ const truncate = (str, n) => {
 const createCard = (anime) => {
   let title = truncate(anime.title, 40);
   return `
-    <div class="card" id="${anime.mal_id}">
+     <div class="card" id="${anime.mal_id}">
       <img src="${anime.images.jpg.image_url}" alt="Anime" class="anime-picture" />
       <p class="anime-title">${title}</p>
       <div class="container--rating">
@@ -139,6 +139,41 @@ const setupAddButtons = () => {
   });
 };
 
+const createRemoveCard = (anime) => {
+  let title = truncate(anime.title, 40);
+  return `
+     <div class="card" id="${anime.mal_id}">
+      <img src="${anime.images.jpg.image_url}" alt="Anime" class="anime-picture" />
+      <p class="anime-title">${title}</p>
+      <div class="container--rating">
+      <div class="container--wrapper">
+        <span class="increment">ᗑ</span>
+        <span class="decrement">ᗐ</span>
+        <span class="rate">5</span>
+        </div>
+      </div>
+      <button class="anime-btn-remove">Remove</button>
+    </div>
+  `;
+};
+
+const setupRemoveButtons = () => {
+  const buttons = document.querySelectorAll(`.anime-btn-remove`);
+  buttons.forEach((btn) => {
+    btn.addEventListener(`click`, () => {
+      const card = btn.parentNode;
+      const cardId = card.id;
+      const clickedObject = searchData.find((anime) => {
+        return +anime.mal_id === +cardId;
+      });
+      const index = animeList.findIndex((object) => +object.mal_id === +cardId);
+      animeList.splice(index, 1);
+      localStorage.setItem(`animeList`, JSON.stringify(animeList));
+      containerAdded.removeChild(card);
+    });
+  });
+};
+
 inputSearch.addEventListener(`keydown`, (e) => {
   if (e.key == `Enter`) {
     e.preventDefault();
@@ -159,12 +194,15 @@ buttonSearch.addEventListener(`keydown`, (e) => {
 });
 
 const init = () => {
-  dataLocalStorage = JSON.parse(localStorage.getItem(`animeList`));
-  let html = "";
-  dataLocalStorage.forEach((anime) => {
-    html += createCard(anime);
-  });
-  containerAdded.innerHTML = html;
+  if (localStorage.getItem(`animeList`) !== null) {
+    dataLocalStorage = JSON.parse(localStorage.getItem(`animeList`));
+    let html = "";
+    dataLocalStorage.forEach((anime) => {
+      html += createRemoveCard(anime);
+    });
+    containerAdded.innerHTML = html;
+    setupRemoveButtons();
+  }
 };
 
 // localStorage.clear();

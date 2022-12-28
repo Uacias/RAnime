@@ -140,7 +140,8 @@ button:focus {
     0 -0.07em #647dec;
 }
 
-.anime-btn-add {
+.anime-btn-add,
+.anime-btn-remove {
   width: 100%;
   padding: 12px;
   color: rgba(255, 255, 255, 0.8);
