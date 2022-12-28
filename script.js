@@ -9,7 +9,9 @@ const popupButton = document.querySelector(`.popup--button`);
 const popupInput = document.querySelector(`.popup--input`);
 
 let searchData = [];
-let myAnimeList = [];
+let animeList = [];
+let dataLocalStorage = [];
+let receivedAnimeList = [];
 let inputRank = 0;
 
 const fetchAnime = (query) => {
@@ -28,31 +30,35 @@ const truncate = (str, n) => {
   return str.length > n ? str.slice(0, n - 1) + "&hellip;" : str;
 };
 
-const displayResults = () => {
-  let title;
-  searchData.forEach((anime) => {
-    title = truncate(anime.title, 40);
-    containerFetched.style.padding = `1rem`;
-    containerFetched.innerHTML += `
-        <div class="card">
-          <img src="${anime.images.jpg.image_url}" alt="Anime" class="anime-picture" />
-          <p class="anime-title">${title}</p>
-          <div class="container--rating">
-          <div class="container--wrapper">
-            <span class="increment">ᗑ</span>
-            <span class="decrement">ᗐ</span>
-            <span class="rate">0</span>
-            </div>
-          </div>
-          <button class="anime-btn-add">Add</button>
+const createCard = (anime) => {
+  let title = truncate(anime.title, 40);
+  return `
+    <div class="card" id="${anime.mal_id}">
+      <img src="${anime.images.jpg.image_url}" alt="Anime" class="anime-picture" />
+      <p class="anime-title">${title}</p>
+      <div class="container--rating">
+      <div class="container--wrapper">
+        <span class="increment">ᗑ</span>
+        <span class="decrement">ᗐ</span>
+        <span class="rate">0</span>
         </div>
-        `;
-  });
+      </div>
+      <button class="anime-btn-add">Add</button>
+    </div>
+  `;
+};
 
+const displayResults = () => {
+  let html = "";
+  searchData.forEach((anime) => {
+    html += createCard(anime);
+  });
+  containerFetched.innerHTML = html;
   hideRanks();
   setupAddButtons();
   setupRankingButtons();
-  searchData = [];
+  //TODO: SEARCHDATA IS BEING CLEANED - THAT CAUSES PROBLEM
+  // searchData = [];
 };
 
 const hideRanks = () => {
@@ -78,25 +84,6 @@ const search = () => {
     </div>`;
   }
 };
-
-inputSearch.addEventListener(`keydown`, (e) => {
-  if (e.key == `Enter`) {
-    e.preventDefault();
-    search();
-  }
-});
-
-buttonSearch.addEventListener(`click`, (e) => {
-  e.preventDefault();
-  search();
-});
-
-buttonSearch.addEventListener(`keydown`, (e) => {
-  if (e.key == `Enter`) {
-    e.preventDefault();
-    search();
-  }
-});
 
 const setupRankingButtons = () => {
   const buttonsInc = document.querySelectorAll(`.increment`);
@@ -128,9 +115,21 @@ const setupAddButtons = () => {
   buttons.forEach((btn) => {
     btn.addEventListener(`click`, () => {
       const card = btn.parentNode;
+      const cardId = card.id;
+      const clickedObject = searchData.find((anime) => {
+        return +anime.mal_id === +cardId;
+      });
+
       if (btn.textContent === `Remove`) {
+        const index = animeList.findIndex(
+          (object) => +object.mal_id === +cardId
+        );
+        animeList.splice(index, 1);
+        localStorage.setItem(`animeList`, JSON.stringify(animeList));
         containerAdded.removeChild(card);
       } else {
+        animeList.push(clickedObject);
+        localStorage.setItem(`animeList`, JSON.stringify(animeList));
         const rank = btn.parentNode.querySelector(`.container--rating`);
         rank.style.display = `block`;
         btn.textContent = `Remove`;
@@ -139,3 +138,34 @@ const setupAddButtons = () => {
     });
   });
 };
+
+inputSearch.addEventListener(`keydown`, (e) => {
+  if (e.key == `Enter`) {
+    e.preventDefault();
+    search();
+  }
+});
+
+buttonSearch.addEventListener(`click`, (e) => {
+  e.preventDefault();
+  search();
+});
+
+buttonSearch.addEventListener(`keydown`, (e) => {
+  if (e.key == `Enter`) {
+    e.preventDefault();
+    search();
+  }
+});
+
+const init = () => {
+  dataLocalStorage = JSON.parse(localStorage.getItem(`animeList`));
+  let html = "";
+  dataLocalStorage.forEach((anime) => {
+    html += createCard(anime);
+  });
+  containerAdded.innerHTML = html;
+};
+
+// localStorage.clear();
+init();
