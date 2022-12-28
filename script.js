@@ -19,11 +19,13 @@ const fetchAnime = (query) => {
     .then((response) => response.json())
     .then((data) => {
       data.data.forEach((anime) => {
+        anime.userRating = 0;
         searchData.push(anime);
       });
       console.log(searchData);
       displayResults();
     });
+  searchData = [];
 };
 
 const truncate = (str, n) => {
@@ -31,16 +33,17 @@ const truncate = (str, n) => {
 };
 
 const createCard = (anime) => {
-  let title = truncate(anime.title, 40);
   return `
      <div class="card" id="${anime.mal_id}">
-      <img src="${anime.images.jpg.image_url}" alt="Anime" class="anime-picture" />
-      <p class="anime-title">${title}</p>
+      <img src="${
+        anime.images.jpg.image_url
+      }" alt="Anime" class="anime-picture" />
+      <p class="anime-title">${truncate(anime.title, 40)}</p>
       <div class="container--rating">
-      <div class="container--wrapper">
-        <span class="increment">ᗑ</span>
-        <span class="decrement">ᗐ</span>
-        <span class="rate">0</span>
+        <div class="container--wrapper">
+          <span class="increment">ᗑ</span>
+          <span class="decrement">ᗐ</span>
+          <span class="rate">${anime.userRating}</span>
         </div>
       </div>
       <button class="anime-btn-add">Add</button>
@@ -49,7 +52,7 @@ const createCard = (anime) => {
 };
 
 const displayResults = () => {
-  let html = "";
+  let html = '<div class="wrapper"><h2>Found</h2></div>';
   searchData.forEach((anime) => {
     html += createCard(anime);
   });
@@ -62,8 +65,8 @@ const displayResults = () => {
 };
 
 const hideRanks = () => {
-  const allCards = containerFetched.querySelectorAll(`.card`);
-  allCards.forEach((element) => {
+  const fetchedCards = containerFetched.querySelectorAll(`.card`);
+  fetchedCards.forEach((element) => {
     const rankDiv = element.querySelector(`.container--rating`);
     if (rankDiv) {
       rankDiv.style.display = `none`;
@@ -90,21 +93,29 @@ const setupRankingButtons = () => {
   const buttonsDec = document.querySelectorAll(`.decrement`);
 
   buttonsInc.forEach((btn) => {
-    const card = btn.parentNode;
-    const _rate = card.querySelector(`.rate`);
+    const card = btn.parentNode.parentNode.parentNode;
+    const _rate = btn.parentNode.querySelector(`.rate`);
     btn.addEventListener(`click`, () => {
       if (_rate.innerHTML < 10) {
         _rate.innerHTML = +_rate.innerHTML + 0.5;
+        const cardId = card.id;
+        const anime = animeList.find((a) => a.mal_id == cardId);
+        anime.userRating = +_rate.innerHTML;
+        localStorage.setItem(`animeList`, JSON.stringify(animeList));
       }
     });
   });
 
   buttonsDec.forEach((btn) => {
-    const card = btn.parentNode;
-    const _rate = card.querySelector(`.rate`);
+    const card = btn.parentNode.parentNode.parentNode;
+    const _rate = btn.parentNode.querySelector(`.rate`);
     btn.addEventListener(`click`, () => {
       if (+_rate.innerHTML > 0) {
         _rate.innerHTML = +_rate.innerHTML - 0.5;
+        const cardId = card.id;
+        const anime = animeList.find((a) => a.mal_id == cardId);
+        anime.userRating = +_rate.innerHTML;
+        localStorage.setItem(`animeList`, JSON.stringify(animeList));
       }
     });
   });
@@ -129,6 +140,7 @@ const setupAddButtons = () => {
         containerAdded.removeChild(card);
       } else {
         animeList.push(clickedObject);
+        console.log(clickedObject.userRating);
         localStorage.setItem(`animeList`, JSON.stringify(animeList));
         const rank = btn.parentNode.querySelector(`.container--rating`);
         rank.style.display = `block`;
@@ -149,7 +161,7 @@ const createRemoveCard = (anime) => {
       <div class="container--wrapper">
         <span class="increment">ᗑ</span>
         <span class="decrement">ᗐ</span>
-        <span class="rate">5</span>
+        <span class="rate">${anime.userRating}</span>
         </div>
       </div>
       <button class="anime-btn-remove">Remove</button>
@@ -196,14 +208,15 @@ buttonSearch.addEventListener(`keydown`, (e) => {
 const init = () => {
   if (localStorage.getItem(`animeList`) !== null) {
     dataLocalStorage = JSON.parse(localStorage.getItem(`animeList`));
-    let html = "";
+    animeList = dataLocalStorage;
+    let html = '<div class="wrapper"><h2>My ranking</h2></div>';
     dataLocalStorage.forEach((anime) => {
       html += createRemoveCard(anime);
     });
     containerAdded.innerHTML = html;
     setupRemoveButtons();
+    setupRankingButtons();
   }
 };
 
-// localStorage.clear();
 init();
